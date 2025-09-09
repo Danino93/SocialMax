@@ -4,12 +4,17 @@
 /node_modules
 /.pnp
 .pnp.js
+node_modules/
+*/node_modules/
 
 # testing
 /coverage
+coverage/
 
 # production
 /build
+build/
+dist/
 
 # misc
 .DS_Store
@@ -21,3 +26,13 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Backend specific
+backend/node_modules/
+backend/dist/
+backend/.env
+
+# Frontend specific
+frontend/node_modules/
+frontend/build/
+frontend/.env
