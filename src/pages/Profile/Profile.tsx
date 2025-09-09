@@ -58,6 +58,7 @@ const Profile: React.FC = () => {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      
       {/* Header */}
       <Header onMenuClick={() => {}} />
       
