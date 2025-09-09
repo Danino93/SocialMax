@@ -36,3 +36,10 @@ backend/.env
 frontend/node_modules/
 frontend/build/
 frontend/.env
+
+# Large files
+*.dll
+*.exe
+*.zip
+*.tar.gz
+*.rar
