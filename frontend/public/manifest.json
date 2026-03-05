@@ -1,0 +1,43 @@
+{
+  "name": "SocialSniper — שירותי SMM ישראל",
+  "short_name": "SocialSniper",
+  "description": "קנה עוקבים, לייקים וצפיות לרשתות החברתיות. המחירים הכי נמוכים בישראל.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#7c3aed",
+  "lang": "he",
+  "dir": "rtl",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "categories": ["business", "social", "marketing"],
+  "shortcuts": [
+    {
+      "name": "שירותי אינסטגרם",
+      "url": "/services/instagram",
+      "description": "קנה עוקבים ולייקים לאינסטגרם"
+    },
+    {
+      "name": "שירותי טיקטוק",
+      "url": "/services/tiktok",
+      "description": "קנה עוקבים וצפיות לטיקטוק"
+    }
+  ]
+}
