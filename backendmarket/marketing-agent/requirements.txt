@@ -1,0 +1,15 @@
+telethon==1.36.0
+apscheduler==3.10.4
+python-dotenv==1.0.1
+python-telegram-bot==21.6
+pytz==2024.1
+
+# ─── Instagram Agent ──────────────────────────────────────────────────────────
+instagrapi>=2.0.0
+requests>=2.31.0
+
+# ─── Facebook Agent ───────────────────────────────────────────────────────────
+playwright>=1.40.0
+
+# ─── Image processing (shared) ────────────────────────────────────────────────
+Pillow>=10.0.0

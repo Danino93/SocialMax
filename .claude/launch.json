@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "SocialSniper Frontend",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": ["C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "start"],
+      "cwd": "C:/Users/danin/SocialMax/frontend",
+      "env": {
+        "PORT": "3001",
+        "BROWSER": "none"
+      },
+      "port": 3001
+    }
+  ]
+}

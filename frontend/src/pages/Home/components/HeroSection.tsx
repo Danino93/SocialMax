@@ -1,386 +1,330 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
+import { TELEGRAM_LINK } from '../../../components/Layout/Header';
+
+const TYPING_WORDS = ['לייקים', 'עוקבים', 'צפיות', 'מנויים', 'שיתופים'];
+
+// Pre-computed particles to avoid random on every render
+const PARTICLES = [
+  { id: 0,  l: 8,   t: 14,  s: 2, dur: 7,  del: 0   },
+  { id: 1,  l: 22,  t: 38,  s: 1, dur: 9,  del: 1.2 },
+  { id: 2,  l: 45,  t: 6,   s: 3, dur: 6,  del: 0.5 },
+  { id: 3,  l: 67,  t: 72,  s: 2, dur: 8,  del: 2.1 },
+  { id: 4,  l: 83,  t: 25,  s: 1, dur: 11, del: 0.8 },
+  { id: 5,  l: 12,  t: 85,  s: 2, dur: 7,  del: 3.3 },
+  { id: 6,  l: 55,  t: 52,  s: 1, dur: 9,  del: 1.7 },
+  { id: 7,  l: 91,  t: 48,  s: 3, dur: 6,  del: 2.5 },
+  { id: 8,  l: 33,  t: 91,  s: 1, dur: 10, del: 0.3 },
+  { id: 9,  l: 76,  t: 8,   s: 2, dur: 8,  del: 4.1 },
+  { id: 10, l: 18,  t: 60,  s: 1, dur: 12, del: 1.0 },
+  { id: 11, l: 62,  t: 33,  s: 3, dur: 7,  del: 3.8 },
+  { id: 12, l: 40,  t: 78,  s: 2, dur: 9,  del: 0.6 },
+  { id: 13, l: 88,  t: 90,  s: 1, dur: 6,  del: 2.9 },
+  { id: 14, l: 3,   t: 44,  s: 2, dur: 8,  del: 4.5 },
+  { id: 15, l: 72,  t: 18,  s: 1, dur: 11, del: 1.4 },
+  { id: 16, l: 27,  t: 55,  s: 3, dur: 7,  del: 3.0 },
+  { id: 17, l: 95,  t: 35,  s: 1, dur: 9,  del: 0.9 },
+  { id: 18, l: 50,  t: 95,  s: 2, dur: 8,  del: 2.2 },
+  { id: 19, l: 15,  t: 22,  s: 1, dur: 6,  del: 4.7 },
+  { id: 20, l: 79,  t: 65,  s: 2, dur: 10, del: 1.6 },
+  { id: 21, l: 35,  t: 10,  s: 3, dur: 7,  del: 3.5 },
+  { id: 22, l: 58,  t: 82,  s: 1, dur: 9,  del: 0.4 },
+  { id: 23, l: 6,   t: 70,  s: 2, dur: 8,  del: 2.8 },
+  { id: 24, l: 47,  t: 28,  s: 1, dur: 11, del: 1.1 },
+];
+
+const FLOATING_ICONS = [
+  { icon: '📸', x: 7,  y: 22, delay: 0,   size: 36 },
+  { icon: '👥', x: 88, y: 16, delay: 1.5, size: 32 },
+  { icon: '🎵', x: 4,  y: 68, delay: 3.2, size: 28 },
+  { icon: '▶️', x: 93, y: 62, delay: 2.1, size: 34 },
+  { icon: '✈️', x: 51, y: 6,  delay: 4.0, size: 30 },
+  { icon: '💬', x: 82, y: 85, delay: 0.8, size: 26 },
+];
 
 const HeroSection: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [liveOrders, setLiveOrders] = useState(12);
+  const [cursorVisible, setCursorVisible] = useState(true);
 
+  // Typewriter effect
   useEffect(() => {
-    setIsLoaded(true);
+    const word = TYPING_WORDS[wordIndex];
+    let timer: NodeJS.Timeout;
+    if (!isDeleting) {
+      if (displayed.length < word.length) {
+        timer = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), 130);
+      } else {
+        timer = setTimeout(() => setIsDeleting(true), 2200);
+      }
+    } else {
+      if (displayed.length > 0) {
+        timer = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 65);
+      } else {
+        setIsDeleting(false);
+        setWordIndex(i => (i + 1) % TYPING_WORDS.length);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [displayed, isDeleting, wordIndex]);
+
+  // Blinking cursor
+  useEffect(() => {
+    const interval = setInterval(() => setCursorVisible(v => !v), 530);
+    return () => clearInterval(interval);
   }, []);
 
+  // Live orders counter
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const interval = setInterval(() => setLiveOrders(c => c + 1), 14000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <section style={{
-      position: 'relative',
-      minHeight: '100vh',
-      background: `
-        radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(120, 119, 198, 0.3), transparent 50%),
-        linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)
-      `,
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      {/* Animated Background Particles */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: `
-          radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
-          radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
-          radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
-          radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.3), transparent),
-          radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.2), transparent)
-        `,
-        backgroundRepeat: 'repeat',
-        backgroundSize: '200px 100px',
-        animation: 'float 20s infinite linear'
-      }}></div>
-
-      {/* Floating Geometric Shapes */}
-      <div style={{
-        position: 'absolute',
-        top: '10%',
-        left: '10%',
-        width: '100px',
-        height: '100px',
-        background: 'linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
-        borderRadius: '20px',
-        transform: 'rotate(45deg)',
-        animation: 'float 6s ease-in-out infinite'
-      }}></div>
-      
-      <div style={{
-        position: 'absolute',
-        top: '20%',
-        right: '15%',
-        width: '60px',
-        height: '60px',
-        background: 'linear-gradient(45deg, rgba(255,215,0,0.3), rgba(255,105,180,0.2))',
-        borderRadius: '50%',
-        animation: 'pulse 4s ease-in-out infinite'
-      }}></div>
-
-      <div style={{
-        position: 'absolute',
-        bottom: '20%',
-        left: '20%',
-        width: '80px',
-        height: '80px',
-        background: 'linear-gradient(45deg, rgba(0,255,255,0.2), rgba(138,43,226,0.3))',
-        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-        animation: 'rotate 8s linear infinite'
-      }}></div>
-
-      {/* Main Content */}
-      <div style={{
+    <section
+      aria-label="כותרת ראשית"
+      style={{
         position: 'relative',
-        zIndex: 10,
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         textAlign: 'center',
-        maxWidth: '1200px',
-        padding: '0 20px',
-        transform: isLoaded ? 'translateY(0)' : 'translateY(50px)',
-        opacity: isLoaded ? 1 : 0,
-        transition: 'all 1s ease-out'
-      }}>
-        {/* Revolutionary Title */}
+        overflow: 'hidden',
+        padding: '100px 24px 80px',
+      }}
+    >
+      {/* ── Background Layer ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        {/* Grid */}
         <div style={{
-          position: 'relative',
-          marginBottom: '40px'
-        }}>
-          <h1 style={{
-            fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontWeight: '900',
-            background: 'linear-gradient(45deg, #fff, #f0f0f0, #fff, #e0e0e0)',
-            backgroundSize: '400% 400%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: '0 0 30px rgba(255,255,255,0.5)',
-            marginBottom: '20px',
-            animation: 'shimmer 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate'
-          }}>
-            SocialMax
-          </h1>
-          
-          <div style={{
-            position: 'relative',
-            display: 'inline-block'
-          }}>
-            <h2 style={{
-              fontSize: 'clamp(1.5rem, 4vw, 3rem)',
-              fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #ffd700, #ff69b4, #00ffff, #ffd700)',
-              backgroundSize: '400% 400%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              margin: 0,
-              animation: 'rainbow 4s ease-in-out infinite, float 3s ease-in-out infinite'
-            }}>
-              המפלצה של הרשתות החברתיות
-            </h2>
-            
-            {/* Glowing Effect */}
-            <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+        }} />
+        {/* Orb 1 */}
+        <div style={{
+          position: 'absolute', width: 800, height: 800, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 60%)',
+          top: -350, right: -250, animation: 'heroOrb 12s ease-in-out infinite',
+        }} />
+        {/* Orb 2 */}
+        <div style={{
+          position: 'absolute', width: 650, height: 650, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(37,99,235,0.16) 0%, transparent 60%)',
+          bottom: -250, left: -180, animation: 'heroOrb 15s ease-in-out infinite 5s',
+        }} />
+        {/* Orb 3 */}
+        <div style={{
+          position: 'absolute', width: 450, height: 450, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 60%)',
+          top: '40%', left: '45%', animation: 'heroOrb 18s ease-in-out infinite 9s',
+        }} />
+
+        {/* Floating platform icons */}
+        {FLOATING_ICONS.map(fi => (
+          <div
+            key={fi.icon}
+            style={{
               position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(45deg, #ffd700, #ff69b4, #00ffff, #ffd700)',
-              backgroundSize: '400% 400%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'blur(10px)',
-              opacity: 0.7,
-              animation: 'rainbow 4s ease-in-out infinite'
-            }}>
-              המפלצה של הרשתות החברתיות
-            </div>
+              left: `${fi.x}%`,
+              top: `${fi.y}%`,
+              fontSize: fi.size,
+              opacity: 0.12,
+              animation: `heroOrb ${8 + fi.delay}s ease-in-out infinite ${fi.delay}s`,
+              filter: 'blur(0.5px)',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+          >
+            {fi.icon}
+          </div>
+        ))}
+
+        {/* Particle dots */}
+        {PARTICLES.map(p => (
+          <div
+            key={p.id}
+            style={{
+              position: 'absolute',
+              left: `${p.l}%`,
+              top: `${p.t}%`,
+              width: p.s,
+              height: p.s,
+              borderRadius: '50%',
+              background: p.id % 3 === 0 ? '#7c3aed' : p.id % 3 === 1 ? '#2563eb' : '#a855f7',
+              opacity: 0.25,
+              animation: `particlePulse ${p.dur}s ease-in-out infinite ${p.del}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── Content ── */}
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, width: '100%' }}>
+
+        {/* Live orders badge */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+            borderRadius: 100, padding: '7px 18px',
+          }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%', background: '#10b981',
+              display: 'inline-block', animation: 'livePulse 1.8s ease-in-out infinite', flexShrink: 0,
+            }} />
+            <span style={{ color: '#34d399', fontSize: 13, fontWeight: 600 }}>
+              🔥 {liveOrders} הזמנות בשעה האחרונה
+            </span>
           </div>
         </div>
 
-        {/* Revolutionary Description */}
-        <p style={{
-          fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)',
-          color: 'rgba(255,255,255,0.9)',
-          maxWidth: '800px',
-          margin: '0 auto 50px',
-          lineHeight: 1.6,
-          textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
-          opacity: isLoaded ? 1 : 0,
-          transition: 'all 1s ease-out 0.3s'
-        }}>
-          הפלטפורמה המתקדמת ביותר בישראל לשיווק ברשתות החברתיות. 
-          עוקבים, לייקים, צפיות ועוד - הכל במקום אחד!
-        </p>
-
-        {/* Revolutionary CTA Buttons */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          alignItems: 'center',
-          marginBottom: '60px',
-          transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
-          opacity: isLoaded ? 1 : 0,
-          transition: 'all 1s ease-out 0.6s'
-        }}>
-          {isAuthenticated ? (
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-              <button style={{
-                background: 'linear-gradient(45deg, #fff, #f8f9fa)',
-                color: '#667eea',
-                border: 'none',
-                padding: '20px 40px',
-                borderRadius: '50px',
-                fontSize: '20px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <span style={{ position: 'relative', zIndex: 2 }}>🚀 היכנס לדשבורד</span>
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '-100%',
-                  width: '100%',
-                  height: '100%',
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                  transition: 'left 0.5s ease'
-                }}></div>
-              </button>
-            </Link>
-          ) : (
-            <>
-              <Link to="/register" style={{ textDecoration: 'none' }}>
-                <button style={{
-                  background: 'linear-gradient(45deg, #ff6b6b, #ff8e8e, #ff6b6b)',
-                  backgroundSize: '200% 200%',
-                  color: 'white',
-                  border: 'none',
-                  padding: '20px 40px',
-                  borderRadius: '50px',
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  boxShadow: '0 15px 35px rgba(255,107,107,0.4), 0 0 0 1px rgba(255,255,255,0.1)',
-                  transition: 'all 0.3s ease',
-                  animation: 'gradientShift 3s ease infinite',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <span style={{ position: 'relative', zIndex: 2 }}>🎯 התחל עכשיו - חינם!</span>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    transition: 'left 0.5s ease'
-                  }}></div>
-                </button>
-              </Link>
-              <Link to="/login" style={{ textDecoration: 'none' }}>
-                <button style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  color: 'white',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  padding: '18px 38px',
-                  borderRadius: '50px',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  backdropFilter: 'blur(10px)',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <span style={{ position: 'relative', zIndex: 2 }}>🔐 התחבר</span>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                    transition: 'left 0.5s ease'
-                  }}></div>
-                </button>
-              </Link>
-            </>
-          )}
+        {/* Top badge */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+          <span className="badge badge-purple" style={{ fontSize: 14, padding: '8px 22px' }}>
+            ✨ הפלטפורמה הישראלית #1 לשיווק ברשתות
+          </span>
         </div>
 
-        {/* Revolutionary Stats */}
+        {/* H1 with typewriter */}
+        <h1 style={{
+          fontSize: 'clamp(36px, 7vw, 72px)',
+          fontWeight: 900,
+          lineHeight: 1.1,
+          marginBottom: 12,
+          letterSpacing: '-0.5px',
+          color: 'white',
+        }}>
+          קנה{' '}
+          <span style={{
+            background: 'linear-gradient(135deg, #a855f7 0%, #818cf8 50%, #60a5fa 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            display: 'inline-block',
+            minWidth: '3ch',
+          }}>
+            {displayed}
+            <span style={{
+              WebkitTextFillColor: '#a855f7',
+              opacity: cursorVisible ? 1 : 0,
+              transition: 'opacity 0.1s',
+            }}>|</span>
+          </span>
+        </h1>
+        <h1 style={{
+          fontSize: 'clamp(36px, 7vw, 72px)',
+          fontWeight: 900,
+          lineHeight: 1.1,
+          marginBottom: 28,
+          letterSpacing: '-0.5px',
+          color: 'white',
+        }}>
+          לרשתות החברתיות שלך
+        </h1>
+
+        {/* Subheadline - keyword rich */}
+        <p style={{
+          fontSize: 'clamp(16px, 2.2vw, 20px)',
+          color: '#94a3b8',
+          lineHeight: 1.8,
+          marginBottom: 14,
+          maxWidth: 680,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          עוקבים לאינסטגרם, לייקים לפייסבוק, צפיות לטיקטוק ומנויים ליוטיוב.
+        </p>
+        <p style={{
+          fontSize: 'clamp(14px, 1.8vw, 17px)',
+          color: '#64748b',
+          lineHeight: 1.7,
+          marginBottom: 44,
+          maxWidth: 580,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          המחירים הכי נמוכים בישראל · מסירה מהירה · תמיכה מלאה בעברית
+        </p>
+
+        {/* CTA Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 52 }}>
+          <Link
+            to="/services"
+            className="btn-primary"
+            style={{ fontSize: 17, padding: '15px 40px', borderRadius: 14 }}
+          >
+            🔥 צפה בכל השירותים
+          </Link>
+          <a
+            href={TELEGRAM_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-telegram"
+            style={{ fontSize: 17, padding: '15px 40px', borderRadius: 14 }}
+          >
+            📱 הזמן עכשיו בטלגרם
+          </a>
+        </div>
+
+        {/* Trust badges */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '40px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
-          opacity: isLoaded ? 1 : 0,
-          transition: 'all 1s ease-out 0.9s'
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px 28px',
         }}>
           {[
-            { number: '10,000+', label: 'משתמשים פעילים', icon: '👥', color: '#ffd700' },
-            { number: '1M+', label: 'הזמנות מושלמות', icon: '📋', color: '#ff69b4' },
-            { number: '99.9%', label: 'זמינות שירות', icon: '⚡', color: '#00ffff' }
-          ].map((stat, index) => (
-            <div
-              key={index}
-              style={{
-                textAlign: 'center',
-                padding: '30px 20px',
-                background: 'rgba(255,255,255,0.1)',
-                borderRadius: '20px',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-10px) scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <div style={{
-                fontSize: '3rem',
-                marginBottom: '10px',
-                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))'
-              }}>
-                {stat.icon}
-              </div>
-              <div style={{
-                fontSize: '2.5rem',
-                fontWeight: 'bold',
-                color: stat.color,
-                marginBottom: '10px',
-                textShadow: '0 0 20px rgba(255,255,255,0.5)'
-              }}>
-                {stat.number}
-              </div>
-              <div style={{
-                fontSize: '1.1rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: '500'
-              }}>
-                {stat.label}
-              </div>
+            { icon: '🔒', text: 'מאובטח 100%' },
+            { icon: '⚡', text: 'מסירה תוך שעות' },
+            { icon: '🇮🇱', text: 'תמיכה בעברית' },
+            { icon: '✅', text: '1,000+ לקוחות' },
+            { icon: '🔄', text: 'ערבות Refill' },
+          ].map((b, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#64748b', fontSize: 14 }}>
+              <span>{b.icon}</span> {b.text}
             </div>
           ))}
         </div>
       </div>
 
-      {/* CSS Animations */}
+      {/* Scroll hint */}
+      <div style={{
+        position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        color: '#334155', animation: 'scrollBounce 2s ease-in-out infinite',
+      }}>
+        <div style={{ width: 22, height: 34, border: '2px solid #334155', borderRadius: 11, position: 'relative' }}>
+          <div style={{
+            width: 4, height: 8, background: '#475569', borderRadius: 2,
+            position: 'absolute', top: 4, left: '50%', transform: 'translateX(-50%)',
+            animation: 'scrollDot 2s ease-in-out infinite',
+          }} />
+        </div>
+      </div>
+
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
+        @keyframes heroOrb {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -20px) scale(1.05); }
+          66% { transform: translate(-20px, 30px) scale(0.95); }
         }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.7; }
-          50% { transform: scale(1.1); opacity: 1; }
+        @keyframes particlePulse {
+          0%, 100% { transform: scale(1); opacity: 0.25; }
+          50% { transform: scale(2.5); opacity: 0.5; }
         }
-        
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes livePulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+          50% { transform: scale(1.2); box-shadow: 0 0 0 6px rgba(16,185,129,0); }
         }
-        
-        @keyframes shimmer {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(8px); }
         }
-        
-        @keyframes glow {
-          from { text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-          to { text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.3); }
-        }
-        
-        @keyframes rainbow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        button:hover > div {
-          left: 100% !important;
+        @keyframes scrollDot {
+          0%, 100% { top: 4px; opacity: 1; }
+          50% { top: 14px; opacity: 0.3; }
         }
       `}</style>
     </section>
