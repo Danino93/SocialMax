@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
             '@context': 'https://schema.org',
             '@type': 'Organization',
             name: 'SocialSniper',
-            url: 'https://socialsniper.co.il',
+            url: 'https://socialsniper.vercel.app',
             description: 'שירותי SMM לשוק הישראלי - עוקבים, לייקים, צפיות לכל הפלטפורמות',
             contactPoint: {
               '@type': 'ContactPoint',

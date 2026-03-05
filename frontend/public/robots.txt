@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://socialsniper.co.il/sitemap.xml
+Sitemap: https://socialsniper.vercel.app/sitemap.xml

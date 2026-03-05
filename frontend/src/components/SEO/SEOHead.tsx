@@ -9,7 +9,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = 'SocialSniper';
-const SITE_URL = 'https://socialsniper.co.il';
+const SITE_URL = 'https://socialsniper.vercel.app';
 const DEFAULT_DESCRIPTION =
   'SocialSniper - הפלטפורמה הישראלית #1 לשיווק ברשתות חברתיות. קנה עוקבים, לייקים, צפיות לאינסטגרם, פייסבוק, טיקטוק, יוטיוב ועוד. מחירים נמוכים, מסירה מהירה, תמיכה בעברית.';
 const DEFAULT_KEYWORDS =

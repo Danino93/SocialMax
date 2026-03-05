@@ -2,82 +2,85 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Core pages -->
-  <url><loc>https://socialsniper.co.il/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://socialsniper.co.il/pricing</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/services</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/reviews</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/contact</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/case-studies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/spin</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://socialsniper.vercel.app/</loc><changefreq>daily</changefreq><priority>1.0</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/pricing</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/reviews</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/about</loc><changefreq>monthly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/contact</loc><changefreq>monthly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/case-studies</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/spin</loc><changefreq>monthly</changefreq><priority>0.5</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/quiz</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/build</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
 
   <!-- Platform service pages -->
-  <url><loc>https://socialsniper.co.il/services/instagram</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/services/tiktok</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/services/facebook</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/services/youtube</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/services/telegram</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/services/whatsapp</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/services/twitter</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/services/discord</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/services/spotify</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/services/google-business</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://socialsniper.vercel.app/services/instagram</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/tiktok</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/facebook</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/youtube</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/telegram</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/whatsapp</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/twitter</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/discord</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/spotify</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/services/google-business</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
 
   <!-- SEO Buy landing pages (existing 12) -->
-  <url><loc>https://socialsniper.co.il/buy/instagram-followers</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/instagram-likes</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/instagram-reels</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/tiktok-followers</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/tiktok-views</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/tiktok-likes</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/facebook-likes</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/youtube-subscribers</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/youtube-views</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/telegram-members</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/whatsapp-members</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/twitter-followers</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://socialsniper.vercel.app/buy/instagram-followers</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/instagram-likes</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/instagram-reels</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/tiktok-followers</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/tiktok-views</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/tiktok-likes</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/facebook-likes</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/youtube-subscribers</loc><changefreq>weekly</changefreq><priority>0.9</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/youtube-views</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/telegram-members</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/whatsapp-members</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/twitter-followers</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
 
   <!-- SEO Buy landing pages (new 20) -->
-  <url><loc>https://socialsniper.co.il/buy/spotify-followers</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/discord-members</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/google-reviews</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/instagram-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/instagram-stories</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/facebook-followers</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/facebook-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/tiktok-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/twitter-likes</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/twitter-retweets</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/youtube-likes</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/youtube-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/telegram-views</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/whatsapp-group</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/linkedin-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/pinterest-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/snapchat-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/soundcloud-plays</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/twitch-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://socialsniper.co.il/buy/reddit-upvotes</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://socialsniper.vercel.app/buy/spotify-followers</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/discord-members</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/google-reviews</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/instagram-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/instagram-stories</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/facebook-followers</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/facebook-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/tiktok-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/twitter-likes</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/twitter-retweets</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/youtube-likes</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/youtube-comments</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/telegram-views</loc><changefreq>weekly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/whatsapp-group</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/linkedin-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/pinterest-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/snapchat-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/soundcloud-plays</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/twitch-followers</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/buy/reddit-upvotes</loc><changefreq>weekly</changefreq><priority>0.6</priority><lastmod>2026-03-05</lastmod></url>
 
-  <!-- Guides (all 13) -->
-  <url><loc>https://socialsniper.co.il/guides</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/what-is-smm</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/grow-instagram</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/tiktok-marketing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/instagram-algorithm-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/how-to-make-money-tiktok</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/google-reviews-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/is-buying-followers-legal-israel</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/youtube-growth-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/facebook-marketing-israel</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/whatsapp-business-tips</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/smm-vs-facebook-ads</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/discord-for-businesses</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://socialsniper.co.il/guides/smm-beginners-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- Guides (14 total) -->
+  <url><loc>https://socialsniper.vercel.app/guides</loc><changefreq>weekly</changefreq><priority>0.8</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/what-is-smm</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/grow-instagram</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/tiktok-marketing</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/instagram-algorithm-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/how-to-make-money-tiktok</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/google-reviews-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/is-buying-followers-legal-israel</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/youtube-growth-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/facebook-marketing-israel</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/whatsapp-business-tips</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/smm-vs-facebook-ads</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/discord-for-businesses</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/smm-beginners-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/guides/ultimate-boost-checklist</loc><changefreq>monthly</changefreq><priority>0.7</priority><lastmod>2026-03-05</lastmod></url>
 
   <!-- Legal -->
-  <url><loc>https://socialsniper.co.il/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://socialsniper.co.il/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://socialsniper.vercel.app/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority><lastmod>2026-03-05</lastmod></url>
+  <url><loc>https://socialsniper.vercel.app/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority><lastmod>2026-03-05</lastmod></url>
 
 </urlset>
