@@ -18,6 +18,7 @@ from .database import (
 )
 from .messages import get_group_post_template
 from .browser import human_delay, slow_scroll
+from shared.ai_provider import ai_generate_sync
 import pytz
 from datetime import datetime
 
@@ -281,7 +282,24 @@ async def run_group_posting_session(page: Page) -> int:
         if is_paused():
             break
 
-        template_id, post_text = get_group_post_template(last_template_id)
+        # ── AI post generation ────────────────────────────────────────────────
+        group_name   = group.get("name", group["fb_group_id"])
+        member_count = group.get("member_count", 0)
+        members_str  = f"{member_count:,}" if member_count else "?"
+        ai_prompt = (
+            f'כתוב פוסט בעברית לקבוצת פייסבוק בשם "{group_name}" ({members_str} חברים).\n'
+            f'מוצר: שירות SMM ישראלי — SocialSniper (עוקבים/לייקים בכל הפלטפורמות).\n'
+            f'כולל: שאלה שפותחת שיח + ערך אמיתי לקורא + mention של @socialsniper93_bot.\n'
+            f'אסור: ספאם, הבטחות שווא, לינקים. 3-5 שורות.'
+        )
+        ai_post = ai_generate_sync(ai_prompt, "fb_post")
+        if ai_post:
+            post_text   = ai_post
+            template_id = last_template_id
+            logger.debug("AI post for FB group '%s' (%d chars)", group_name, len(post_text))
+        else:
+            template_id, post_text = get_group_post_template(last_template_id)
+
         success = await post_in_group(page, group, post_text)
 
         if success:

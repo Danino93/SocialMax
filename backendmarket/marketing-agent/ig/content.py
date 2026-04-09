@@ -8,7 +8,9 @@ Strategy:
 import logging
 import os
 import time
+import random
 import requests
+import pytz
 from instagrapi import Client
 from instagrapi.exceptions import ClientError, FeedbackRequired, LoginRequired
 
@@ -183,3 +185,127 @@ def post_daily_reel(cl: Client, last_caption_id: int = -1) -> bool:
         log_ig_post("REELS", caption_id, "failed", "")
         logger.error("Failed to post daily Reel (tried both methods)")
         return False
+
+
+# ─── Feature 9 — Hashtag Peak Time Analysis ──────────────────────────────────
+
+def analyze_hashtag_peak_time(cl: Client, hashtag: str = "שיווקדיגיטלי") -> dict:
+    """
+    Feature 9: מנתח מתי ה-hashtag הכי פעיל → מחזיר dict עם peak_hour + histogram.
+    שימוש: לתזמן את פרסום ה-Reel היומי לשעת השיא.
+    """
+    try:
+        tz     = pytz.timezone("Asia/Jerusalem")
+        medias = cl.hashtag_medias_recent(hashtag, amount=100)
+
+        hour_counts: dict[int, int] = {}
+        for media in medias:
+            taken_at = getattr(media, "taken_at", None)
+            if not taken_at:
+                continue
+            try:
+                if taken_at.tzinfo is None:
+                    import pytz as _pytz
+                    taken_at = _pytz.utc.localize(taken_at)
+                local_hour = taken_at.astimezone(tz).hour
+                hour_counts[local_hour] = hour_counts.get(local_hour, 0) + 1
+            except Exception:
+                pass
+
+        if not hour_counts:
+            return {"peak_hour": 11, "histogram": {}}
+
+        peak_hour = max(hour_counts, key=hour_counts.get)
+        return {"peak_hour": peak_hour, "histogram": hour_counts}
+
+    except Exception as e:
+        logger.warning("Peak time analysis failed for #%s: %s", hashtag, e)
+        return {"peak_hour": 11, "histogram": {}}
+
+
+def get_peak_time_report(cl: Client) -> str:
+    """מחזיר דוח טקסטואלי לAdmin על שעות הפרסום האופטימליות."""
+    from .outreach import SEARCH_HASHTAGS
+    hashtag = random.choice(SEARCH_HASHTAGS[:5])
+    result  = analyze_hashtag_peak_time(cl, hashtag)
+    peak    = result["peak_hour"]
+    hist    = result.get("histogram", {})
+
+    top_hours = sorted(hist.items(), key=lambda x: x[1], reverse=True)[:5]
+    lines = [
+        f"⏰ <b>Peak Time Analysis — #{hashtag}</b>\n",
+        f"🏆 שעת שיא: <b>{peak}:00</b>\n",
+        "📊 Top 5 שעות:",
+    ]
+    for hour, count in top_hours:
+        bar = "█" * min(count // 2, 15)
+        lines.append(f"  {hour:02d}:00 {bar} ({count})")
+
+    lines.append(f"\n💡 מומלץ לפרסם ב-{peak}:00 לחשיפה מקסימלית")
+    return "\n".join(lines)
+
+
+# ─── Feature 12 — Trending Audio Finder ──────────────────────────────────────
+
+def find_trending_audio(cl: Client) -> list[dict]:
+    """
+    Feature 12: מוצא audio tracks טרנדינג מ-Reels ישראלים.
+    מחזיר רשימה של {title, artist, count} ממוינת לפי פופולריות.
+    """
+    from .outreach import SEARCH_HASHTAGS
+    AUDIO_HASHTAGS = ["ריל", "ישראל", "תלאביב", "ויראלי", "אינסטגרם"]
+
+    audio_counts: dict[str, dict] = {}
+
+    for hashtag in AUDIO_HASHTAGS:
+        try:
+            medias = cl.hashtag_medias_recent(hashtag, amount=40)
+            for media in medias:
+                if getattr(media, "media_type", 0) != 2:
+                    continue  # רק Videos/Reels
+
+                # נסה לקבל מידע על האודיו
+                clips_meta = getattr(media, "clips_metadata", None)
+                if not clips_meta:
+                    continue
+
+                audio_info = getattr(clips_meta, "original_sound_info", None)
+                if not audio_info:
+                    # נסה audio_type
+                    audio_type = getattr(clips_meta, "audio_type", "") or ""
+                    if audio_type and audio_type != "original":
+                        title = audio_type
+                    else:
+                        continue
+                else:
+                    title  = getattr(audio_info, "original_audio_title", "") or ""
+                    artist = getattr(audio_info, "ig_artist", None)
+                    artist_name = getattr(artist, "username", "") if artist else ""
+                    if not title:
+                        continue
+                    title = f"{title} — {artist_name}" if artist_name else title
+
+                if title in audio_counts:
+                    audio_counts[title]["count"] += 1
+                else:
+                    audio_counts[title] = {"title": title, "count": 1}
+
+        except Exception as e:
+            logger.debug("Trending audio error for #%s: %s", hashtag, e)
+
+    result = sorted(audio_counts.values(), key=lambda x: x["count"], reverse=True)
+    return result[:8]
+
+
+def get_trending_audio_report(cl: Client) -> str:
+    """מחזיר דוח טקסטואלי לAdmin על אודיו טרנדינג."""
+    tracks = find_trending_audio(cl)
+    if not tracks:
+        return "🎵 <b>Trending Audio</b>\n\n<i>לא נמצאו נתונים כרגע. נסה שוב מאוחר יותר.</i>"
+
+    lines = ["🎵 <b>Trending Audio — ישראל השבוע</b>\n"]
+    for i, track in enumerate(tracks, 1):
+        lines.append(f"{i}. {track['title']} (×{track['count']} Reels)")
+
+    lines.append("\n💡 השתמש באחד מהסאונדים האלה ב-Reel הבא לחשיפה מקסימלית!")
+    return "\n".join(lines)

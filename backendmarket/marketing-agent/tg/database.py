@@ -54,7 +54,11 @@ def init_db() -> None:
             date             TEXT PRIMARY KEY,
             groups_found     INTEGER DEFAULT 0,
             posts_sent       INTEGER DEFAULT 0,
-            posts_failed     INTEGER DEFAULT 0
+            posts_failed     INTEGER DEFAULT 0,
+            comments_sent    INTEGER DEFAULT 0,
+            reactions_sent   INTEGER DEFAULT 0,
+            monitor_dms_sent INTEGER DEFAULT 0,
+            scraper_dms_sent INTEGER DEFAULT 0
         );
 
         -- מצב Agent (pause / resume)
@@ -69,6 +73,60 @@ def init_db() -> None:
             sends        INTEGER DEFAULT 0,
             successes    INTEGER DEFAULT 0
         );
+
+        -- DMs שנשלחו (scraper + monitor)
+        CREATE TABLE IF NOT EXISTS dm_log (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     TEXT    NOT NULL,
+            source      TEXT    NOT NULL,
+            text        TEXT,
+            sent_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Monitor hits
+        CREATE TABLE IF NOT EXISTS monitor_hits (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     TEXT    NOT NULL,
+            group_id    TEXT    NOT NULL,
+            keyword     TEXT,
+            message     TEXT,
+            hit_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- הודעות מתחרים
+        CREATE TABLE IF NOT EXISTS competitor_msgs (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            channel_id  TEXT    NOT NULL,
+            msg_id      TEXT    NOT NULL UNIQUE,
+            text        TEXT,
+            saved_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Sentiment Tracker
+        CREATE TABLE IF NOT EXISTS sentiment_daily (
+            date    TEXT NOT NULL,
+            keyword TEXT NOT NULL,
+            count   INTEGER DEFAULT 0,
+            PRIMARY KEY (date, keyword)
+        );
+
+        -- Engagement log
+        CREATE TABLE IF NOT EXISTS engagement_log (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_id    TEXT    NOT NULL,
+            msg_id      TEXT,
+            action      TEXT    NOT NULL,
+            done_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Lead Qualifier Bot — מעקב אחרי שיחות כישורים
+        CREATE TABLE IF NOT EXISTS qualifier_conversations (
+            user_id      TEXT PRIMARY KEY,
+            status       TEXT DEFAULT 'awaiting',  -- awaiting / qualified
+            platform     TEXT,
+            asked_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            qualified_at TIMESTAMP
+        );
     """)
 
     # ברירת מחדל — agent פעיל
@@ -81,6 +139,19 @@ def init_db() -> None:
         cursor.execute("ALTER TABLE groups ADD COLUMN success_rate REAL DEFAULT 1.0")
     except Exception:
         pass  # Column already exists
+
+    # Migration: add missing daily_stats counters for newer TG features
+    _daily_stat_migrations = [
+        ("comments_sent", "INTEGER DEFAULT 0"),
+        ("reactions_sent", "INTEGER DEFAULT 0"),
+        ("monitor_dms_sent", "INTEGER DEFAULT 0"),
+        ("scraper_dms_sent", "INTEGER DEFAULT 0"),
+    ]
+    for col_name, col_def in _daily_stat_migrations:
+        try:
+            cursor.execute(f"ALTER TABLE daily_stats ADD COLUMN {col_name} {col_def}")
+        except Exception:
+            pass  # Column already exists
 
     conn.commit()
     conn.close()
@@ -335,15 +406,33 @@ def _ensure_today() -> None:
 
 
 def increment_stat(field: str) -> None:
-    """מגדיל עמודת סטטיסטיקה ב-1. field: groups_found | posts_sent | posts_failed"""
+    """????? ????? ????????? ?-1 ???? ???? ?????? ????."""
+    allowed_fields = {
+        "groups_found",
+        "posts_sent",
+        "posts_failed",
+        "comments_sent",
+        "reactions_sent",
+        "monitor_dms_sent",
+        "scraper_dms_sent",
+    }
+    if field not in allowed_fields:
+        logger.warning("increment_stat called with unsupported field: %s", field)
+        return
+
     _ensure_today()
     today = date.today().isoformat()
     conn = get_conn()
-    conn.execute(
-        f"UPDATE daily_stats SET {field} = {field} + 1 WHERE date = ?", (today,)
-    )
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute(
+            f"UPDATE daily_stats SET {field} = {field} + 1 WHERE date = ?", (today,)
+        )
+        conn.commit()
+    except sqlite3.OperationalError:
+        # Protect runtime if DB was created with an older schema and migration failed.
+        logger.warning("increment_stat failed for field '%s' due to missing column", field)
+    finally:
+        conn.close()
 
 
 def get_today_stats() -> dict:
@@ -389,3 +478,237 @@ def set_paused(paused: bool) -> None:
     )
     conn.commit()
     conn.close()
+
+
+# ─── DM Log (scraper + monitor) ───────────────────────────────────────────────
+
+def log_dm_sent(user_id: str, source: str, text: str) -> None:
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO dm_log (user_id, source, text) VALUES (?, ?, ?)",
+        (user_id, source, text),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_dm_cooldown_ok(user_id: str, cooldown_days: int) -> bool:
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM dm_log WHERE user_id=? AND datetime(sent_at,'+' || ? ||' days')>datetime('now') LIMIT 1",
+        (user_id, cooldown_days),
+    ).fetchone()
+    conn.close()
+    return row is None
+
+
+def get_monitor_dms_today() -> int:
+    today = date.today().isoformat()
+    conn  = get_conn()
+    row   = conn.execute(
+        "SELECT COUNT(*) FROM dm_log WHERE source='monitor' AND date(sent_at)=?", (today,)
+    ).fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+
+def get_scraper_dms_today() -> int:
+    today = date.today().isoformat()
+    conn  = get_conn()
+    row   = conn.execute(
+        "SELECT COUNT(*) FROM dm_log WHERE source='scraper' AND date(sent_at)=?", (today,)
+    ).fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+
+# ─── Monitor hits ─────────────────────────────────────────────────────────────
+
+def log_monitor_hit(user_id: str, group_id: str, keyword: str, message: str) -> None:
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO monitor_hits (user_id, group_id, keyword, message) VALUES (?,?,?,?)",
+        (user_id, group_id, keyword, message),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_monitor_hits_today() -> int:
+    today = date.today().isoformat()
+    conn  = get_conn()
+    row   = conn.execute(
+        "SELECT COUNT(*) FROM monitor_hits WHERE date(hit_at)=?", (today,)
+    ).fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+
+# ─── Competitor msgs ──────────────────────────────────────────────────────────
+
+def log_competitor_msg(channel_id: str, msg_id: str, text: str) -> None:
+    conn = get_conn()
+    conn.execute(
+        "INSERT OR IGNORE INTO competitor_msgs (channel_id, msg_id, text) VALUES (?,?,?)",
+        (channel_id, msg_id, text),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_recent_competitor_msgs(limit: int = 10) -> list[dict]:
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT channel_id, text, saved_at FROM competitor_msgs ORDER BY saved_at DESC LIMIT ?",
+        (limit,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+# ─── Sentiment Tracker ────────────────────────────────────────────────────────
+
+def increment_sentiment(keyword: str) -> None:
+    today = date.today().isoformat()
+    conn  = get_conn()
+    conn.execute(
+        "INSERT INTO sentiment_daily (date,keyword,count) VALUES (?,?,1) "
+        "ON CONFLICT(date,keyword) DO UPDATE SET count=count+1",
+        (today, keyword),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_top_sentiments(limit: int = 10) -> list[dict]:
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT keyword, SUM(count) as total FROM sentiment_daily "
+        "WHERE date >= date('now','-7 days') GROUP BY keyword ORDER BY total DESC LIMIT ?",
+        (limit,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+# ─── Engagement log ───────────────────────────────────────────────────────────
+
+def log_comment(group_id: str, msg_id: str) -> None:
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO engagement_log (group_id,msg_id,action) VALUES (?,?,'comment')",
+        (group_id, msg_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def log_reaction(group_id: str, msg_id: str) -> None:
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO engagement_log (group_id,msg_id,action) VALUES (?,?,'reaction')",
+        (group_id, msg_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_comment_cooldown_ok(group_id: str, cooldown_days: int) -> bool:
+    conn = get_conn()
+    row  = conn.execute(
+        "SELECT 1 FROM engagement_log WHERE group_id=? AND action='comment' "
+        "AND datetime(done_at,'+' || ? ||' days')>datetime('now') LIMIT 1",
+        (group_id, cooldown_days),
+    ).fetchone()
+    conn.close()
+    return row is None
+
+
+def get_reaction_cooldown_ok(group_id: str, cooldown_days: int) -> bool:
+    conn = get_conn()
+    row  = conn.execute(
+        "SELECT 1 FROM engagement_log WHERE group_id=? AND action='reaction' "
+        "AND datetime(done_at,'+' || ? ||' days')>datetime('now') LIMIT 1",
+        (group_id, cooldown_days),
+    ).fetchone()
+    conn.close()
+    return row is None
+
+
+def get_engagement_stats_today() -> dict:
+    today = date.today().isoformat()
+    conn  = get_conn()
+    c = conn.execute(
+        "SELECT COUNT(*) FROM engagement_log WHERE action='comment' AND date(done_at)=?", (today,)
+    ).fetchone()
+    r = conn.execute(
+        "SELECT COUNT(*) FROM engagement_log WHERE action='reaction' AND date(done_at)=?", (today,)
+    ).fetchone()
+    conn.close()
+    return {"comments_sent": c[0] if c else 0, "reactions_sent": r[0] if r else 0}
+
+
+# ─── Lead Qualifier Bot ────────────────────────────────────────────────────────
+
+def set_qualifier_awaiting(user_id: str) -> None:
+    """מסמן שהמשתמש קיבל שאלת כישורים ואנחנו מחכים לתשובה."""
+    conn = get_conn()
+    conn.execute(
+        "INSERT OR REPLACE INTO qualifier_conversations (user_id, status) VALUES (?, 'awaiting')",
+        (user_id,),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_qualifier_status(user_id: str) -> str | None:
+    """מחזיר: 'awaiting' / 'qualified' / None אם אין רשומה."""
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT status FROM qualifier_conversations WHERE user_id=?", (user_id,)
+    ).fetchone()
+    conn.close()
+    return row["status"] if row else None
+
+
+def set_qualifier_done(user_id: str, platform: str) -> None:
+    """מסמן שהמשתמש qualified — הפלטפורמה זוהתה ופיץ' נשלח."""
+    conn = get_conn()
+    conn.execute(
+        "UPDATE qualifier_conversations SET status='qualified', platform=?, qualified_at=CURRENT_TIMESTAMP WHERE user_id=?",
+        (platform, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_qualified_today() -> int:
+    """כמה leads qualified היום?"""
+    today = date.today().isoformat()
+    conn  = get_conn()
+    row   = conn.execute(
+        "SELECT COUNT(*) FROM qualifier_conversations WHERE status='qualified' AND date(qualified_at)=?",
+        (today,),
+    ).fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+
+def get_qualifier_stats() -> dict:
+    """סטטיסטיקות qualifier — סה"כ + היום + פלטפורמות."""
+    today = date.today().isoformat()
+    conn  = get_conn()
+    total     = conn.execute("SELECT COUNT(*) FROM qualifier_conversations WHERE status='qualified'").fetchone()[0]
+    today_cnt = conn.execute(
+        "SELECT COUNT(*) FROM qualifier_conversations WHERE status='qualified' AND date(qualified_at)=?", (today,)
+    ).fetchone()[0]
+    platforms = conn.execute(
+        "SELECT platform, COUNT(*) as cnt FROM qualifier_conversations WHERE status='qualified' "
+        "GROUP BY platform ORDER BY cnt DESC"
+    ).fetchall()
+    conn.close()
+    return {
+        "total": total,
+        "today": today_cnt,
+        "platforms": [dict(r) for r in platforms],
+    }

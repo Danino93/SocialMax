@@ -59,16 +59,22 @@ echo "✈️   מפעיל Shop & Admin Bot  (shop_main.py)..."
 "$PYTHON" -m shop.main >> logs/bot.log 2>&1 &
 PID_BOT=$!
 
+echo "🕵️   מפעיל Competitor Infiltrator (ci.main)..."
+"$PYTHON" -m ci.main >> logs/ci_agent.log 2>&1 &
+PID_CI=$!
+
 echo ""
 echo "✅  כל ה-Agents פועלים!"
 echo ""
-echo "   PID  Telegram  : $PID_TG"
-echo "   PID  Instagram : $PID_IG"
-echo "   PID  Facebook  : $PID_FB"
-echo "   PID  TikTok    : $PID_TT"
-echo "   PID  Bot       : $PID_BOT"
+echo "   PID  Telegram              : $PID_TG"
+echo "   PID  Instagram             : $PID_IG"
+echo "   PID  Facebook              : $PID_FB"
+echo "   PID  TikTok                : $PID_TT"
+echo "   PID  Bot                   : $PID_BOT"
+echo "   PID  Competitor Infiltrator: $PID_CI"
 echo ""
 echo "📋  לוגים: tail -f logs/bot.log"
+echo "🕵️   CI לוג: tail -f logs/ci_agent.log"
 echo "🛑  לעצירה: Ctrl+C"
 echo ""
 
@@ -81,10 +87,11 @@ cleanup() {
     kill $PID_FB  2>/dev/null || true
     kill $PID_TT  2>/dev/null || true
     kill $PID_BOT 2>/dev/null || true
+    kill $PID_CI  2>/dev/null || true
     echo "👋  כל ה-Agents נעצרו."
     exit 0
 }
 trap cleanup SIGINT SIGTERM
 
 # ── המתנה עד שאחד התהליכים ייכשל ──────────────────────────────────────────────
-wait $PID_TG $PID_IG $PID_FB $PID_TT $PID_BOT
+wait $PID_TG $PID_IG $PID_FB $PID_TT $PID_BOT $PID_CI

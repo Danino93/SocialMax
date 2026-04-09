@@ -1,34 +1,30 @@
-"""
-SocialSniper — Telegram Marketing Agent
-מריץ Telethon user client לפרסום בקבוצות טלגרם.
+﻿"""Telegram marketing agent scheduler and runtime."""
 
-לוח זמנים (שעון ישראל):
-  09:00 — גילוי קבוצות חדשות
-  11:00, 15:00, 19:00 — sessions פרסום
-
-הפעלה עצמאית (standalone):
-  python tg_main.py
-
-הפעלה מ-bot.py (ללא בוט עצמאי):
-  הקובץ bot.py מפעיל את run_tg_agent() — ראה bot.py
-"""
 import asyncio
 import logging
 import sys
-from telethon import TelegramClient
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import pytz
 
+import pytz
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from telethon import TelegramClient
+
+from . import monitor
+from . import qualifier
 from .config import (
-    TELE_API_ID, TELE_API_HASH, TELE_PHONE,
-    SESSION_NAME, TIMEZONE,
+    CI_COMPETITORS_TG,
     MAX_NEW_GROUPS_PER_DAY,
+    SESSION_NAME,
+    TELE_API_HASH,
+    TELE_API_ID,
+    TELE_PHONE,
+    TIMEZONE,
 )
 from .database import init_db
-from .search import find_groups
+from .engager import run_engagement_session
 from .poster import run_posting_session
+from .scraper import run_scraper_session
+from .search import find_groups
 
-# ─── לוגינג ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
     level=logging.INFO,
@@ -40,94 +36,139 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ─── Scheduled jobs ───────────────────────────────────────────────────────────
-
 async def job_discover(client: TelegramClient) -> None:
-    """09:00 — גילוי קבוצות חדשות."""
-    logger.info("=== Telegram Group Discovery התחיל ===")
+    """Run group discovery job."""
+    logger.info("=== Telegram Group Discovery started ===")
     found = await find_groups(client, daily_limit=MAX_NEW_GROUPS_PER_DAY)
-    logger.info("=== Discovery הסתיים: %d קבוצות חדשות ===", found)
+    logger.info("=== Discovery finished: %d new groups ===", found)
 
 
 async def job_posting_session(client: TelegramClient) -> None:
-    """11:00 / 15:00 / 19:00 — session פרסום."""
-    logger.info("=== Telegram Posting session התחיל ===")
-    sent = await run_posting_session(client)
-    logger.info("=== Posting session הסתיים: %d פרסומים ===", sent)
+    """Run posting session."""
+    logger.info("=== Telegram Posting session started ===")
+    try:
+        sent = await run_posting_session(client)
+        logger.info("=== Posting session finished: %d posts ===", sent)
+    except asyncio.CancelledError:
+        logger.info("Posting session cancelled during shutdown.")
 
 
-# ─── Engine — גרעין ה-Agent (ללא בוט) ────────────────────────────────────────
+def _parse_competitor_ids(raw: str) -> list[int]:
+    """Parse comma-separated competitor IDs to int list."""
+    if not raw:
+        return []
+    result: list[int] = []
+    for part in raw.split(","):
+        part = part.strip().lstrip("@")
+        try:
+            result.append(int(part))
+        except ValueError:
+            continue
+    return result
+
 
 async def run_tg_agent() -> None:
-    """
-    מריץ את Telegram Agent ללא בוט Admin.
-    הבוט מנוהל ע"י bot.py — ראה bot.py.
-    """
+    """Run Telegram agent without the admin bot poller."""
     init_db()
 
     if not TELE_API_ID or not TELE_API_HASH or not TELE_PHONE:
         logger.error(
-            "פרטי Telethon חסרים!\n"
-            "הגדר TELE_API_ID, TELE_API_HASH, TELE_PHONE ב-.env\n"
-            "מקבלים מ-https://my.telegram.org"
+            "Missing Telethon credentials. "
+            "Set TELE_API_ID, TELE_API_HASH, TELE_PHONE in .env"
         )
         return
 
     tz = pytz.timezone(TIMEZONE)
 
-    # ── Telethon user client ──────────────────────────────────────────────────
     telethon_client = TelegramClient(SESSION_NAME, TELE_API_ID, TELE_API_HASH)
     await telethon_client.start(phone=TELE_PHONE)
-    logger.info("Telethon client מחובר ✓")
+    logger.info("Telethon client connected")
 
-    # ── Scheduler ─────────────────────────────────────────────────────────────
-    scheduler = AsyncIOScheduler(timezone=tz)
+    competitor_ids = _parse_competitor_ids(CI_COMPETITORS_TG)
+    monitor.register_handlers(telethon_client, competitor_ids)
+    logger.info("Monitor handlers registered")
 
-    # 09:00 — גילוי קבוצות חדשות
-    scheduler.add_job(
-        job_discover, "cron", hour=9, minute=0,
-        args=[telethon_client], id="tg_discover",
+    qualifier.register_handler(telethon_client)
+    logger.info("Qualifier handler registered")
+
+    scheduler = AsyncIOScheduler(
+        timezone=tz,
+        job_defaults={
+            "coalesce": True,
+            "misfire_grace_time": 120,
+            "max_instances": 1,
+        },
     )
 
-    # 11:00, 15:00, 19:00 — sessions פרסום
-    for hour in [11, 15, 19]:
+    discover_slots = [(8, 0), (11, 0), (14, 0), (17, 0), (20, 0)]
+    for idx, (h, m) in enumerate(discover_slots):
         scheduler.add_job(
-            job_posting_session, "cron", hour=hour, minute=0,
-            args=[telethon_client], id=f"tg_posting_{hour}",
+            job_discover,
+            "cron",
+            hour=h,
+            minute=m,
+            id=f"tg_discover_{idx}",
+            args=[telethon_client],
         )
+
+    post_slots = [
+        (7, 15), (8, 45), (10, 0), (11, 30), (13, 0), (14, 30),
+        (16, 0), (17, 30), (19, 0), (20, 30), (22, 0),
+    ]
+    for idx, (h, m) in enumerate(post_slots):
+        scheduler.add_job(
+            job_posting_session,
+            "cron",
+            hour=h,
+            minute=m,
+            id=f"tg_post_{idx}",
+            args=[telethon_client],
+        )
+
+    async def _job_scraper() -> None:
+        await run_scraper_session(telethon_client)
+
+    scraper_slots = [(9, 30), (12, 30), (15, 30), (18, 30), (21, 30)]
+    for idx, (h, m) in enumerate(scraper_slots):
+        scheduler.add_job(_job_scraper, "cron", hour=h, minute=m, id=f"tg_scraper_{idx}")
+
+    async def _job_engage() -> None:
+        await run_engagement_session(telethon_client)
+
+    engage_slots = [
+        (7, 45), (9, 0), (10, 30), (12, 0), (13, 30), (15, 0),
+        (16, 30), (18, 0), (19, 30), (21, 0), (22, 30),
+    ]
+    for idx, (h, m) in enumerate(engage_slots):
+        scheduler.add_job(_job_engage, "cron", hour=h, minute=m, id=f"tg_engage_{idx}")
 
     scheduler.start()
     logger.info(
-        "Telegram Agent Scheduler התחיל.\n"
-        "  09:00 — גילוי קבוצות\n"
-        "  11:00, 15:00, 19:00 — sessions פרסום\n"
-        "  (שעון ישראל)"
+        "Telegram Agent Scheduler started.\n"
+        "  Discovery: 08:00, 11:00, 14:00, 17:00, 20:00\n"
+        "  Posting: 11 slots between 07:15 and 22:00\n"
+        "  Scraper DMs: 09:30, 12:30, 15:30, 18:30, 21:30\n"
+        "  Engagement: 11 slots between 07:45 and 22:30\n"
+        "  Monitor/Qualifier: always-on\n"
+        "  Timezone: Asia/Jerusalem"
     )
 
-    # גילוי ראשוני בהפעלה ראשונה
-    logger.info("מריץ גילוי ראשוני...")
+    logger.info("Running initial discovery...")
     await job_discover(telethon_client)
 
-    # ── Keep alive ────────────────────────────────────────────────────────────
     try:
-        logger.info("Telegram Agent רץ. לעצירה: Ctrl+C")
+        logger.info("Telegram Agent is running. Press Ctrl+C to stop.")
         await asyncio.Event().wait()
     except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
-        logger.info("מכבה Telegram Agent...")
+        logger.info("Shutting down Telegram Agent...")
     finally:
         scheduler.shutdown(wait=False)
         await telethon_client.disconnect()
-        logger.info("Telegram Agent נכבה בצורה נקייה.")
+        logger.info("Telegram Agent stopped cleanly.")
 
-
-# ─── standalone — הפעלה ישירה ─────────────────────────────────────────────────
 
 async def main() -> None:
-    """
-    הפעלה עצמאית — `python tg_main.py`.
-    מריץ רק את Telegram Agent ללא Admin bot.
-    לבוט Admin — הפעל גם `python bot.py` בנפרד.
-    """
+    """Standalone entrypoint: python -m tg.main"""
     await run_tg_agent()
 
 

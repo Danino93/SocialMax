@@ -18,18 +18,18 @@ _admin_raw = os.getenv("ADMIN_ID", "")
 ADMIN_ID: int | None = int(_admin_raw) if _admin_raw.isdigit() else None
 
 # ─── Daily limits ─────────────────────────────────────────────────────────────
-DAILY_DM_LIMIT:      int = int(os.getenv("DAILY_DM_LIMIT", "13"))
-DAILY_COMMENT_LIMIT: int = int(os.getenv("DAILY_COMMENT_LIMIT", "22"))
-DM_COOLDOWN_DAYS:    int = int(os.getenv("DM_COOLDOWN_DAYS", "14"))
+DAILY_DM_LIMIT:        int = int(os.getenv("DAILY_DM_LIMIT", "20"))
+DAILY_COMMENT_LIMIT:   int = int(os.getenv("DAILY_COMMENT_LIMIT", "50"))
+DM_COOLDOWN_DAYS:      int = int(os.getenv("DM_COOLDOWN_DAYS", "14"))
 COMMENT_COOLDOWN_DAYS: int = int(os.getenv("COMMENT_COOLDOWN_DAYS", "7"))
 
 # ─── Action delays (seconds) ──────────────────────────────────────────────────
-MIN_ACTION_DELAY: int = int(os.getenv("MIN_ACTION_DELAY", "90"))
-MAX_ACTION_DELAY: int = int(os.getenv("MAX_ACTION_DELAY", "240"))
+MIN_ACTION_DELAY: int = int(os.getenv("MIN_ACTION_DELAY", "45"))
+MAX_ACTION_DELAY: int = int(os.getenv("MAX_ACTION_DELAY", "120"))
 
 # ─── Active hours (shared with Telegram agent) ───────────────────────────────
-ACTIVE_HOUR_START: int = int(os.getenv("ACTIVE_HOUR_START", "10"))
-ACTIVE_HOUR_END:   int = int(os.getenv("ACTIVE_HOUR_END", "21"))
+ACTIVE_HOUR_START: int = int(os.getenv("ACTIVE_HOUR_START", "7"))
+ACTIVE_HOUR_END:   int = int(os.getenv("ACTIVE_HOUR_END", "22"))
 
 # ─── Content ──────────────────────────────────────────────────────────────────
 VIDEO_PATH: str = os.path.join(_ROOT, "assets", "grok-video.mp4")

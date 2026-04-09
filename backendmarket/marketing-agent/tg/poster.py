@@ -29,8 +29,13 @@ from .database import (
     record_template_result,
 )
 from .messages import get_template
+from .search import find_groups
+from shared.ai_provider import AIProvider
 
 logger = logging.getLogger(__name__)
+
+# AI singleton — נוצר פעם אחת לאורך חיי המודול
+_ai = AIProvider()
 
 
 def _is_active_hour() -> bool:
@@ -58,11 +63,28 @@ async def post_to_group(client: TelegramClient, group: dict) -> bool:
     title         = group.get("title", telegram_id)
     last_template = group.get("last_template_id", -1)
 
-    template_id, text = get_template(last_template)
-
-    # Inject group name — replaces {group_name} placeholder if present
+    # Inject group name
     group_title = group.get("title") or "הקבוצה"
-    text = text.replace("{group_name}", group_title)
+
+    # ── AI message generation (שכבה 1/2/3) ───────────────────────────────────
+    template_id = last_template  # ערך ברירת מחדל אם AI מצליח
+    ai_prompt = (
+        f'כתוב הודעת שיווק קצרה בעברית (2-3 שורות) לקבוצת טלגרם בשם "{group_title}".\n'
+        f'נושא: שירות SMM ישראלי (עוקבים/לייקים/צפיות) — SocialSniper.\n'
+        f'כולל: mention של @socialsniper93_bot.\n'
+        f'טון: {random.choice(["חברי וישיר", "מקצועי", "קצר ולעניין", "עם הומור קל"])}.\n'
+        f'מקסימום 3 שורות. ללא הקדמות.'
+    )
+    ai_text = await _ai.generate(ai_prompt, scenario="tg_post")
+
+    if ai_text:
+        text = ai_text
+        logger.debug("AI message generated for group %s (%d chars)", group_title, len(text))
+    else:
+        # Fallback — תבנית סטטית
+        template_id, text = get_template(last_template)
+        text = text.replace("{group_name}", group_title)
+        logger.debug("Using static template #%d for group %s", template_id, group_title)
 
     try:
         # Resolve entity
@@ -109,13 +131,20 @@ async def post_to_group(client: TelegramClient, group: dict) -> bool:
         return False
 
     except Exception as e:
-        logger.error("שגיאה לא צפויה בפרסום ל-%s: %s", title, e)
+        err_text = str(e)
+        if "join the discussion group before commenting" in err_text.lower():
+            logger.warning(
+                "Cannot post to %s without joining linked discussion group; marking inactive",
+                title,
+            )
+            deactivate_group(telegram_id)
+        else:
+            logger.error("Unexpected posting error for %s: %s", title, e)
         mark_post_failed(telegram_id)
         record_template_result(template_id, success=False)  # A/B tracking
         log_post(telegram_id, template_id, "failed")
         increment_stat("posts_failed")
         return False
-
 
 async def run_posting_session(client: TelegramClient) -> int:
     """
@@ -140,7 +169,15 @@ async def run_posting_session(client: TelegramClient) -> int:
 
     groups = get_eligible_groups(cooldown_days=POST_COOLDOWN_DAYS, limit=remaining * 2)
     if not groups:
-        logger.info("אין קבוצות זמינות לפרסום.")
+        logger.info("No eligible groups found. Running quick discovery fallback...")
+        try:
+            await find_groups(client, daily_limit=8)
+        except Exception as e:
+            logger.warning("Discovery fallback failed: %s", e)
+        groups = get_eligible_groups(cooldown_days=POST_COOLDOWN_DAYS, limit=remaining * 2)
+
+    if not groups:
+        logger.info("?????? ???????????? ???????????? ????????????.")
         return 0
 
     logger.info("Session פרסום: עד %d פרסומים", remaining)

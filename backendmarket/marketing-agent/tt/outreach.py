@@ -28,6 +28,7 @@ from .database import (
 )
 from .messages import get_comment_template
 from .browser import human_delay, slow_scroll
+from shared.ai_provider import ai_generate_sync
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +182,23 @@ async def run_comment_session(page: Page, limit: int) -> int:
         if already_commented(vid_id):
             continue
 
-        template_id, comment_text = get_comment_template(last_template_id)
+        # ── AI comment generation ──────────────────────────────────────────────
+        video_desc = video.get("description", "") or ""
+        ai_prompt = (
+            f'כתוב תגובה קצרה לסרטון TikTok (1 משפט בעברית).\n'
+            f'יוצר הסרטון: @{author}.\n'
+            f'תיאור הסרטון: "{video_desc[:100]}"\n'
+            f'מטרה: תגובה אמיתית/מצחיקה/מעניינת + mention עדין של SocialSniper.\n'
+            f'אסור: spam, פרסום ישיר. אורך: משפט אחד קצר.'
+        )
+        ai_comment = ai_generate_sync(ai_prompt, "tt_comment")
+        if ai_comment:
+            comment_text = ai_comment
+            template_id  = last_template_id
+            logger.debug("AI comment for @%s (%d chars)", author, len(comment_text))
+        else:
+            template_id, comment_text = get_comment_template(last_template_id)
+
         success = await comment_on_video(page, author, vid_id, comment_text)
 
         if success:
